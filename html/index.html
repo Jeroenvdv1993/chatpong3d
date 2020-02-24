@@ -21,9 +21,11 @@
             <ul class="col-6 m-1" id="messages" class="list-group"></ul>
             <ul class="col-2 m-1" id="users" class="list-group"></ul>
         </div>
-        <canvas id="dot" width="256" height="256">
-
-        </canvas>
+        <div class="m-1 row justify-content-center">
+            <canvas id="dot" width="256" height="256">
+    
+            </canvas>
+        </div>
         <form class="m-1 row" id="send" action="/" method="POST" id="chatForm">
             <div class="col-6 form-group">
                 <input id="txt" class="form-control" autocomplete="off" autofocus="on" placeholder="type your message here..."/>
@@ -54,13 +56,16 @@
             // canvas
             const canvas = document.getElementById('dot');
             const context = canvas.getContext('2d');
-            const radius = 5;
+            const radius = 10;
 
             // clients
             socket.on('clients', function(clients){
                 $('#users').empty();
 
                 context.clearRect(0, 0, canvas.width, canvas.height);
+                context.lineWidth = 2;
+                context.strokeStyle = "#FF0000";
+                context.strokeRect(0,0, canvas.width, canvas.height);
 
                 clients.forEach(client => {
                     $('#users').append($('<li>').addClass('list-group-item').html(client.username));
@@ -75,6 +80,31 @@
             // ask username
             var username = prompt('Please tell me your name');
             socket.emit('username', username);
+
+            // move
+            var map = {};
+            document.onkeydown = document.onkeyup = function(e){
+                e = e ||event; // to deal with IE
+                map[e.keyCode] = e.type === 'keydown';
+                if(!($('#txt').is(':focus'))){
+                    if(map[90]){
+                        //console.log("moving up");
+                        socket.emit('move_down', -5);
+                    }
+                    if(map[83]){
+                        //console.log("moving down");
+                        socket.emit('move_down', 5);
+                    }
+                    if(map[81]){
+                        //console.log("moving left");
+                        socket.emit('move_right', -5);
+                    }
+                    if(map[68]){
+                        //console.log("moving right");
+                        socket.emit('move_right', 5);
+                    }
+                }
+            }
         </script>
     </body>
 </html>

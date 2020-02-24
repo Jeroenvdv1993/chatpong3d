@@ -41,5 +41,16 @@ io.on('connection', (socket) =>{
         var print = '<strong>[' + time + ']</strong>' +'<strong>' + socket.username +"</strong>: " + message
         io.emit('chat_message', print);
     });
+
+    socket.on('move_down', function(distance){
+        var index = clients.findIndex(client => client.username === socket.username);
+        clients[index].y += distance;
+        io.emit('clients', clients);
+    })
+    socket.on('move_right', function(distance){
+        var index = clients.findIndex(client => client.username === socket.username);
+        clients[index].x += distance;
+        io.emit('clients', clients);
+    })
 })
 
