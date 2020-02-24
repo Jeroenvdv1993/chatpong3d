@@ -1,7 +1,7 @@
 const express = require('express');
 const socketIO = require('socket.io');
 const PORT = process.env.PORT || 5000;
-const INDEX = "/index.html";
+const INDEX = "/html/index.html";
 
 const server = express()
 .use((req, res) => res.sendFile(INDEX, {root: __dirname}))
@@ -14,15 +14,24 @@ io.on('connection', (socket) =>{
     
     socket.on('username', function(username){
         socket.username = username;
-        io.emit('is_online', '<i>' + socket.username + ' join the chat...</i>');
+        var today = new Date();
+        var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+        var print = '<strong>[' + time + ']</strong>' + '<i>' + socket.username + ' joined the chat...</i>';
+        io.emit('is_online', print);
     });
 
     socket.on('disconnect', function(username){
-        io.emit('is_online', '<i>' + socket.username + ' left the chat...</i>');
+        var today = new Date();
+        var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+        var print = '<strong>[' + time + ']</strong>' + '<i>' + socket.username + ' left the chat...</i>';
+        io.emit('is_online', print);
     });
 
     socket.on('chat_message', function(message){
-        io.emit('chat_message', '<strong>' + socket.username +"</strong>: " + message);
+        var today = new Date();
+        var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+        var print = '<strong>[' + time + ']</strong>' +'<strong>' + socket.username +"</strong>: " + message
+        io.emit('chat_message', print);
     });
 })
 
