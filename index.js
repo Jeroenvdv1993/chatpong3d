@@ -23,7 +23,8 @@ io.on('connection', (socket) =>{
     });
 
     socket.on('disconnect', function(username){
-        clients.splice(clients.indexOf(username), 1);
+        //TODO remove active account
+        clients.splice(clients.indexOf(socket.username), 1);
         var today = new Date();
         var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
         var print = '<strong>[' + time + ']</strong>' + '<i>' + socket.username + ' left the chat...</i>';
