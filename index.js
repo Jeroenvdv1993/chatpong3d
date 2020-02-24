@@ -5,8 +5,6 @@ const io = require('socket.io')(http);
 
 app.set('port', (process.env.PORT || 5000));
 
-app.use(express.static(path.join(__dirname, "public")));
-
 app.listen(app.get('port'), function(){
     console.log('Node server is running on port ' + app.get('port'));
 })
