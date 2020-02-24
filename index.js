@@ -10,13 +10,11 @@ const server = express()
 const io = socketIO(server);
 
 var clients = [];
-var x = 5;
 
 io.on('connection', (socket) =>{
     socket.on('username', function(username){
         socket.username = username;
-        clients.push({username: username, x: x, y: 5});
-        x += 20;
+        clients.push({username: username, x: 5, y: 5});
         var today = new Date();
         var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
         var print = '<strong>[' + time + ']</strong>' + '<i>' + socket.username + ' joined the chat...</i>';
@@ -27,7 +25,6 @@ io.on('connection', (socket) =>{
     socket.on('disconnect', function(username){
         //TODO remove active account
         clients.splice(clients.findIndex(client => client.username === socket.username), 1);
-        x-= 5;
         var today = new Date();
         var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
         var print = '<strong>[' + time + ']</strong>' + '<i>' + socket.username + ' left the chat...</i>';
