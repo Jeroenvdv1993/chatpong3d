@@ -1,13 +1,13 @@
 const express = require('express');
 const app = express();
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
 
 app.set('port', (process.env.PORT || 5000));
 
-app.listen(app.get('port'), function(){
+const server = app.listen(app.get('port'), function(){
     console.log('Node server is running on port ' + app.get('port'));
 })
+
+const io = require('socket.io')(server);
 
 app.use(express.static("./views"));
 
