@@ -3,6 +3,11 @@ import path from 'path';
 import socketIO from 'socket.io';
 import http from 'http';
 import {Client} from './src/client';
+import { Pong } from './src/pong/pong';
+
+//-------
+// Setup
+//-------
 const PORT = process.env.PORT || 5000;
 
 let app = express();
@@ -43,8 +48,17 @@ app.get('/', function(req, res){
 
 const io = socketIO(server);
 
+//------
+// Code
+//------
 let clients: Client[] = [];
 let id: number = 0;
+let pong: Pong = new Pong();
+function update(){
+    pong.update();
+    io.emit('update', pong);
+}
+setInterval(update, 20);
 
 io.on('connection', (socket: any) =>{
     socket.on('username', function(username: string){
@@ -56,6 +70,12 @@ io.on('connection', (socket: any) =>{
         var print = '<strong>[' + time + ']</strong>' + '<i>' + username + ' joined the chat...</i>';
         io.emit('is_online', print);
         io.emit('clients', clients);
+
+        // Activate pong
+        if(clients.length >= 2){
+            console.log("starting pong");
+            pong.startGame();
+        }
     });
 
     socket.on('disconnect', function(){
@@ -67,6 +87,12 @@ io.on('connection', (socket: any) =>{
             var print = '<strong>[' + time + ']</strong>' + '<i>' + username + ' left the chat...</i>';
             io.emit('is_online', print);
             io.emit('clients', clients);
+
+            // Deactivate pong
+            if(clients.length < 2){
+                console.log("stopping pong");
+                pong.stopGame();
+            }
         });
     });
 
@@ -82,28 +108,41 @@ io.on('connection', (socket: any) =>{
 
     socket.on('move_down', function(){
         findClient(function(index: number){
-            clients[index].y += 5;
-            io.emit('clients', clients);
+            if(pong.run){
+                if(index === 0){
+                    pong.player1.moveDown();
+                }
+                else if(index === 1){
+                    pong.player2.moveDown();
+                }
+            }
         });
     })
     socket.on('move_up', function(){
         findClient(function(index: number){
-            clients[index].y -= 5;
-            io.emit('clients', clients);
+            if(pong.run){
+                if(index === 0){
+                    pong.player1.moveUp();
+                }
+                else if(index === 1){
+                    pong.player2.moveUp();
+                }
+            }
         });
     })
-    socket.on('move_right', function(){
+    socket.on('move_stop', function(){
         findClient(function(index: number){
-            clients[index].x += 5;
-            io.emit('clients', clients);
+            if(pong.run){
+                if(index === 0){
+                    pong.player1.stopMoving();
+                }
+                else if(index === 1){
+                    pong.player2.stopMoving();
+                }
+            }
         });
     })
-    socket.on('move_left', function(){
-        findClient(function(index: number){
-            clients[index].x -= 5;
-            io.emit('clients', clients);
-        });
-    })
+
     function findClient(execute: any){
         let index: number = clients.findIndex(client => client.id === socket.id);
         if(index !== -1) execute(index);

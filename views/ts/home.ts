@@ -1,5 +1,6 @@
 import io from 'socket.io-client';
 import {Client} from '../../src/client';
+import {Pong} from '../../src/pong/pong';
 var socket = io();
 
 // submit text message without reload/refresh the page
@@ -30,17 +31,27 @@ if(canvas !== null){
     if(context !== null){
         socket.on('clients', function(clients: Client[]){
             $('#users').empty();
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            context.lineWidth = 2;
-            context.strokeStyle = "#FF0000";
-            context.strokeRect(0,0, canvas.width, canvas.height);
             clients.forEach(client => {
                 $('#users').append($('<li>').addClass('list-group-item').html(client.username));
-                context.beginPath();
-                context.arc(client.x, client.y, radius, 0, 2 * Math.PI, false);
-                context.fillStyle = 'green';
-                context.fill();
             });
+        });
+        socket.on('update', function(pong: Pong){
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.lineWidth = 2;
+            context.strokeStyle = "#000000";
+            context.strokeRect(0,0, canvas.width, canvas.height);
+            context.beginPath();
+            context.arc(pong.ball.position.x, pong.ball.position.y, 8, 0, 2* Math.PI, false);
+            context.fillStyle = 'black';
+            context.fill();
+            context.beginPath();
+            context.rect(pong.player1.position.x, pong.player1.position.y, 32, 32);
+            context.fillStyle = 'black';
+            context.fill();
+            context.beginPath();
+            context.rect(pong.player2.position.x, pong.player2.position.y, 32, 32);
+            context.fillStyle = 'black';
+            context.fill();
         });
     }
 }
@@ -58,14 +69,11 @@ document.onkeydown = document.onkeyup = function(e){
         if(map[90]){
             socket.emit('move_up');
         }
-        if(map[83]){
+        else if(map[83]){
             socket.emit('move_down');
         }
-        if(map[81]){
-            socket.emit('move_left');
-        }
-        if(map[68]){
-            socket.emit('move_right');
+        else{
+            socket.emit('move_stop');
         }
     }
 }
