@@ -53,45 +53,54 @@ io.on('connection', (socket: any) =>{
     });
 
     socket.on('disconnect', function(){
-        let index: number = clients.findIndex(c => c.id === socket.id);
-        let username: string = clients[index].username;
-        clients.splice(index, 1);
-        var today = new Date();
-        var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
-        var print = '<strong>[' + time + ']</strong>' + '<i>' + username + ' left the chat...</i>';
-        io.emit('is_online', print);
-        io.emit('clients', clients);
+        findClient(function(index: number){
+            let username: string = clients[index].username;
+            clients.splice(index, 1);
+            var today = new Date();
+            var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+            var print = '<strong>[' + time + ']</strong>' + '<i>' + username + ' left the chat...</i>';
+            io.emit('is_online', print);
+            io.emit('clients', clients);
+        });
     });
 
     socket.on('chat_message', function(message: string){
-        let index: number = clients.findIndex(c => c.id === socket.id);
-        let username: string = clients[index].username;
-        var today = new Date();
-        var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
-        var print = '<strong>[' + time + ']</strong>' +'<strong>' + username +"</strong>: " + message
-        io.emit('chat_message', print);
+        findClient(function(index: number){
+            let username: string = clients[index].username;
+            var today = new Date();
+            var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+            var print = '<strong>[' + time + ']</strong>' +'<strong>' + username +"</strong>: " + message
+            io.emit('chat_message', print);
+        });
     });
 
     socket.on('move_down', function(){
-        var index = clients.findIndex(client => client.id === socket.id);
-        clients[index].y += 5;
-        io.emit('clients', clients);
+        findClient(function(index: number){
+            clients[index].y += 5;
+            io.emit('clients', clients);
+        });
     })
     socket.on('move_up', function(){
-        var index = clients.findIndex(client => client.id === socket.id);
-        clients[index].y -= 5;
-        io.emit('clients', clients);
+        findClient(function(index: number){
+            clients[index].y -= 5;
+            io.emit('clients', clients);
+        });
     })
     socket.on('move_right', function(){
-        var index = clients.findIndex(client => client.id === socket.id);
-        clients[index].x += 5;
-        io.emit('clients', clients);
+        findClient(function(index: number){
+            clients[index].x += 5;
+            io.emit('clients', clients);
+        });
     })
     socket.on('move_left', function(){
-        var index = clients.findIndex(client => client.id === socket.id);
-        clients[index].x -= 5;
-        io.emit('clients', clients);
-
+        findClient(function(index: number){
+            clients[index].x -= 5;
+            io.emit('clients', clients);
+        });
     })
+    function findClient(execute: any){
+        let index: number = clients.findIndex(client => client.id === socket.id);
+        if(index !== -1) execute(index);
+    }
 })
 
