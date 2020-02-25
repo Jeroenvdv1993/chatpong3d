@@ -88,20 +88,16 @@
                 map[e.keyCode] = e.type === 'keydown';
                 if(!($('#txt').is(':focus'))){
                     if(map[90]){
-                        //console.log("moving up");
-                        socket.emit('move_down', -5);
+                        socket.emit('move_up');
                     }
                     if(map[83]){
-                        //console.log("moving down");
-                        socket.emit('move_down', 5);
+                        socket.emit('move_down');
                     }
                     if(map[81]){
-                        //console.log("moving left");
-                        socket.emit('move_right', -5);
+                        socket.emit('move_left');
                     }
                     if(map[68]){
-                        //console.log("moving right");
-                        socket.emit('move_right', 5);
+                        socket.emit('move_right');
                     }
                 }
             }

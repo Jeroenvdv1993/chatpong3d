@@ -1,5 +1,6 @@
-const express = require('express');
-const socketIO = require('socket.io');
+import express from 'express'
+import socketIO from 'socket.io';
+import {Client} from './client';
 const PORT = process.env.PORT || 5000;
 const INDEX = "/html/index.html";
 
@@ -9,12 +10,14 @@ const server = express()
 
 const io = socketIO(server);
 
-var clients = [];
+let clients: Client[] = [];
+let id: number = 0;
 
-io.on('connection', (socket) =>{
-    socket.on('username', function(username){
-        socket.username = username;
-        clients.push({username: username, x: 5, y: 5});
+io.on('connection', (socket: any) =>{
+    socket.on('username', function(username: string){
+        socket.id = id;
+        clients.push(new Client(id, username, 5, 5));
+        id++;
         var today = new Date();
         var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
         var print = '<strong>[' + time + ']</strong>' + '<i>' + socket.username + ' joined the chat...</i>';
@@ -22,9 +25,8 @@ io.on('connection', (socket) =>{
         io.emit('clients', clients);
     });
 
-    socket.on('disconnect', function(username){
-        //TODO remove active account
-        clients.splice(clients.findIndex(client => client.username === socket.username), 1);
+    socket.on('disconnect', function(){
+        clients.splice(clients.findIndex(client => client.id === socket.id), 1);
         var today = new Date();
         var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
         var print = '<strong>[' + time + ']</strong>' + '<i>' + socket.username + ' left the chat...</i>';
@@ -32,22 +34,33 @@ io.on('connection', (socket) =>{
         io.emit('clients', clients);
     });
 
-    socket.on('chat_message', function(message){
+    socket.on('chat_message', function(message: string){
         var today = new Date();
         var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
         var print = '<strong>[' + time + ']</strong>' +'<strong>' + socket.username +"</strong>: " + message
         io.emit('chat_message', print);
     });
 
-    socket.on('move_down', function(distance){
-        var index = clients.findIndex(client => client.username === socket.username);
-        clients[index].y += distance;
+    socket.on('move_down', function(){
+        var index = clients.findIndex(client => client.id === socket.id);
+        clients[index].y += 5;
         io.emit('clients', clients);
     })
-    socket.on('move_right', function(distance){
-        var index = clients.findIndex(client => client.username === socket.username);
-        clients[index].x += distance;
+    socket.on('move_up', function(){
+        var index = clients.findIndex(client => client.id === socket.id);
+        clients[index].y -= 5;
         io.emit('clients', clients);
+    })
+    socket.on('move_right', function(){
+        var index = clients.findIndex(client => client.id === socket.id);
+        clients[index].x += 5;
+        io.emit('clients', clients);
+    })
+    socket.on('move_left', function(){
+        var index = clients.findIndex(client => client.id === socket.id);
+        clients[index].x -= 5;
+        io.emit('clients', clients);
+
     })
 })
 
