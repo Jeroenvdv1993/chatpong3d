@@ -1,1 +1,3 @@
 node_modules/
+views/ts/*.js
+src/*.js

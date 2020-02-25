@@ -25,6 +25,12 @@ app.get('/css/home.css', function(req, res){
 app.get('/js/home.js', function(req, res){
     res.sendFile(path.join(__dirname + "/views/js/home.js"));
 });
+app.get('/ts/helloworld.js', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/ts/helloworld.js"));
+});
+app.get('/ts/test.js', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/ts/test.js"));
+});
 app.get('/', function(req, res){
     res.sendFile(path.join(__dirname + "/views/html/home.html"));
 });
