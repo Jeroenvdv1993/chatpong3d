@@ -20,24 +20,28 @@ io.on('connection', (socket: any) =>{
         id++;
         var today = new Date();
         var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
-        var print = '<strong>[' + time + ']</strong>' + '<i>' + socket.username + ' joined the chat...</i>';
+        var print = '<strong>[' + time + ']</strong>' + '<i>' + username + ' joined the chat...</i>';
         io.emit('is_online', print);
         io.emit('clients', clients);
     });
 
     socket.on('disconnect', function(){
-        clients.splice(clients.findIndex(client => client.id === socket.id), 1);
+        let index: number = clients.findIndex(c => c.id === socket.id);
+        let username: string = clients[index].username;
+        clients.splice(index, 1);
         var today = new Date();
         var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
-        var print = '<strong>[' + time + ']</strong>' + '<i>' + socket.username + ' left the chat...</i>';
+        var print = '<strong>[' + time + ']</strong>' + '<i>' + username + ' left the chat...</i>';
         io.emit('is_online', print);
         io.emit('clients', clients);
     });
 
     socket.on('chat_message', function(message: string){
+        let index: number = clients.findIndex(c => c.id === socket.id);
+        let username: string = clients[index].username;
         var today = new Date();
         var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
-        var print = '<strong>[' + time + ']</strong>' +'<strong>' + socket.username +"</strong>: " + message
+        var print = '<strong>[' + time + ']</strong>' +'<strong>' + username +"</strong>: " + message
         io.emit('chat_message', print);
     });
 
