@@ -1,12 +1,33 @@
-import express from 'express'
+import express from 'express';
+import path from 'path';
 import socketIO from 'socket.io';
-import {Client} from './client';
+import http from 'http';
+import {Client} from './src/client';
 const PORT = process.env.PORT || 5000;
-const INDEX = "/html/index.html";
 
-const server = express()
-.use((req, res) => res.sendFile(INDEX, {root: __dirname}))
-.listen(PORT, () => console.log(`Listening on ${PORT}`));
+let app = express();
+let server: http.Server = http.createServer(app);
+
+server.listen(PORT, () => console.log(`Listening on ${PORT}`));
+
+app.get('/css/bootstrap.min.css', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/css/bootstrap.min.css"));
+})
+app.get('/js/bootstrap.min.js', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/js/bootstrap.min.js"));
+})
+app.get('/js/jquery-3.4.1.min.js', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/js/jquery-3.4.1.min.js"));
+})
+app.get('/css/home.css', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/css/home.css"));
+});
+app.get('/js/home.js', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/js/home.js"));
+});
+app.get('/', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/html/home.html"));
+});
 
 const io = socketIO(server);
 
