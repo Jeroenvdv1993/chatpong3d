@@ -13,8 +13,14 @@ server.listen(PORT, () => console.log(`Listening on ${PORT}`));
 app.get('/css/bootstrap.min.css', function(req, res){
     res.sendFile(path.join(__dirname + "/views/css/bootstrap.min.css"));
 })
+app.get('/css/bootstrap.min.css.map', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/css/bootstrap.min.css.map"));
+})
 app.get('/js/bootstrap.min.js', function(req, res){
     res.sendFile(path.join(__dirname + "/views/js/bootstrap.min.js"));
+})
+app.get('/js/bootstrap.min.js.map', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/js/bootstrap.min.js.map"));
 })
 app.get('/js/jquery-3.4.1.min.js', function(req, res){
     res.sendFile(path.join(__dirname + "/views/js/jquery-3.4.1.min.js"));
