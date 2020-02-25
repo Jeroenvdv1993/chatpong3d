@@ -45,11 +45,11 @@ if(canvas !== null){
             context.fillStyle = 'black';
             context.fill();
             context.beginPath();
-            context.rect(pong.player1.position.x, pong.player1.position.y, 32, 32);
+            context.rect(pong.player1.position.x, pong.player1.position.y, pong.player1.size.x, pong.player1.size.y);
             context.fillStyle = 'black';
             context.fill();
             context.beginPath();
-            context.rect(pong.player2.position.x, pong.player2.position.y, 32, 32);
+            context.rect(pong.player2.position.x, pong.player2.position.y, pong.player2.size.x, pong.player2.size.y);
             context.fillStyle = 'black';
             context.fill();
         });
