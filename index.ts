@@ -22,8 +22,8 @@ app.get('/js/jquery-3.4.1.min.js', function(req, res){
 app.get('/css/home.css', function(req, res){
     res.sendFile(path.join(__dirname + "/views/css/home.css"));
 });
-app.get('/js/home.js', function(req, res){
-    res.sendFile(path.join(__dirname + "/views/js/home.js"));
+app.get('/ts/home.js', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/ts/home.js"));
 });
 app.get('/ts/helloworld.js', function(req, res){
     res.sendFile(path.join(__dirname + "/views/ts/helloworld.js"));
