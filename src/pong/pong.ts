@@ -74,5 +74,7 @@ export class Pong{
         this.player1.score = 0;
         this.player2.score = 0;
         io.emit('score', this.player1.score, this.player2.score);
+        this.player1.position = new Vector2(4, 127);
+        this.player2.position = new Vector2(252, 127);
     }
 }
