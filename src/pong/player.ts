@@ -11,7 +11,7 @@ export class Player{
         this.position = position;
         this.direction = new Vector2(0, 0);
         this.speed = 5;
-        this.size = new Vector2(8, 32);
+        this.size = new Vector2(8, 64);
         this.score = 0;
     }
 
