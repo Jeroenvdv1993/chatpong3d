@@ -1,7 +1,57 @@
 import io from 'socket.io-client';
 import {Client} from '../../src/client';
 import {Pong} from '../../src/pong/pong';
+import * as THREE from 'three';
+import { Ball } from '../../src/pong/ball';
 var socket = io();
+
+// THREE JS
+let scene = new THREE.Scene();
+let camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+let renderer = new THREE.WebGLRenderer();
+renderer.setSize(256, 256);
+let pong3DElement = document.getElementById('pong3D');
+if(pong3DElement !== null){
+    pong3DElement.appendChild(renderer.domElement);
+}
+    
+let geometry = new THREE.BoxGeometry();
+let sphereGeometry = new THREE.SphereGeometry();
+let material = new THREE.MeshBasicMaterial({ color: 0x00FF00});
+let fieldMaterial = new THREE.MeshBasicMaterial({color: 0xFFFFFF})
+let cube1 = new THREE.Mesh( geometry, material);
+let cube2 = new THREE.Mesh(geometry, material);
+let field = new THREE.Mesh(geometry, fieldMaterial);
+let sphere = new THREE.Mesh(sphereGeometry, material);
+cube1.scale.x = 8;
+cube1.scale.y = 8;
+cube1.scale.z = 64;
+cube2.scale.x = 8;
+cube2.scale.y = 8;
+cube2.scale.z = 64;
+sphere.scale.x = 8;
+sphere.scale.y = 8;
+sphere.scale.z = 8;
+field.scale.x = 256;
+field.scale.y = 8;
+field.scale.z = 256;
+field.position.x = 128;
+field.position.y = -4;
+field.position.z = 128;
+scene.add(cube1);
+scene.add(cube2);
+scene.add(sphere);
+scene.add(field);
+camera.position.x = 128;
+camera.position.y = 256;
+camera.position.z = 256;
+camera.lookAt(new THREE.Vector3(128, 0, 128));
+function animate(){
+    requestAnimationFrame(animate);
+    //console.log(cube.position);
+    renderer.render(scene, camera);
+}
+animate();
 
 // submit text message without reload/refresh the page
 $('#send').submit(function(e){
@@ -20,6 +70,13 @@ socket.on('chat_message', function(msg: string){
 socket.on('is_online', function(username: string){
     $('#messages').append($('<li>').addClass('list-group-item').html(username));
 })
+// clients
+socket.on('clients', function(clients: Client[]){
+    $('#users').empty();
+    clients.forEach(client => {
+        $('#users').append($('<li>').addClass('list-group-item').html(client.username));
+    });
+});
 
 // canvas
 const canvas = <HTMLCanvasElement | null> document.getElementById('pong');
@@ -31,18 +88,24 @@ if(player1 !== null && player2 !== null){
         player2.innerHTML = `${player2Score}`;
     })
 }
+if(pong3DElement !== null){
+    socket.on('update', function(pong: Pong){
+        // Draw 3D
+        //console.log(pong.player1.position);
+        cube1.position.x = pong.player1.position.x;
+        cube1.position.z = pong.player1.position.y;
+        cube2.position.x = pong.player2.position.x;
+        cube2.position.z = pong.player2.position.y;
+        sphere.position.x = pong.ball.position.x;
+        sphere.position.z = pong.ball.position.y;
+    });
+}
 if(canvas !== null){
     const context = canvas.getContext('2d');
     
-    // clients
     if(context !== null){
-        socket.on('clients', function(clients: Client[]){
-            $('#users').empty();
-            clients.forEach(client => {
-                $('#users').append($('<li>').addClass('list-group-item').html(client.username));
-            });
-        });
         socket.on('update', function(pong: Pong){
+            // Draw 2D
             context.clearRect(0, 0, canvas.width, canvas.height);
             context.lineWidth = 2;
             context.strokeStyle = "#000000";
