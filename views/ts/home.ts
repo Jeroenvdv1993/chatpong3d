@@ -96,8 +96,8 @@ if(pong3DElement !== null){
         cube1.position.z = pong.player1.position.y;
         cube2.position.x = pong.player2.position.x;
         cube2.position.z = pong.player2.position.y;
-        sphere.position.x = pong.ball.position.x;
-        sphere.position.z = pong.ball.position.y;
+        sphere.position.x = pong.ball.circle.point.x;
+        sphere.position.z = pong.ball.circle.point.y;
     });
 }
 if(canvas !== null){
@@ -111,7 +111,7 @@ if(canvas !== null){
             context.strokeStyle = "#000000";
             context.strokeRect(0,0, canvas.width, canvas.height);
             context.beginPath();
-            context.arc(pong.ball.position.x, pong.ball.position.y, pong.ball.radius, 0, 2* Math.PI, false);
+            context.arc(pong.ball.circle.point.x, pong.ball.circle.point.y, pong.ball.circle.radius, 0, 2* Math.PI, false);
             context.fillStyle = 'black';
             context.fill();
             context.beginPath();

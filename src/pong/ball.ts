@@ -1,17 +1,19 @@
 import { Vector2 } from './vector2';
+import { Circle} from './circle';
+
+const BALL_RADIUS = 8;
+const BALL_SPEED = 5;
 export class Ball{
-    position: Vector2;
+    circle: Circle;
     direction: Vector2;
     speed: number;
-    radius: number;
 
     constructor(position: Vector2, direction: Vector2){
-        this.position = position;
+        this.circle = new Circle(position, BALL_RADIUS);
         this.direction = direction;
-        this.speed = 5;
-        this.radius = 8;
+        this.speed = BALL_SPEED;
     }
     update(): void{
-        this.position = this.position.add(this.direction.multiply(this.speed));
+        this.circle.point = this.circle.point.add(this.direction.multiply(this.speed));
     }
 }

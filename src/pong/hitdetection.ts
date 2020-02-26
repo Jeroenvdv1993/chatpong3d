@@ -1,31 +1,29 @@
-import { Ball} from './ball'
-import { Player } from './player';
 import { Vector2 } from './vector2';
 import { Rectangle} from './rectangle';
 import { Segment } from './segment';
+import { Circle } from './circle';
 export class HitDetection{
     constructor(){}
 
-    hit(ball: Ball, player: Player): boolean{
-        let playerRectangle: Rectangle = player.getRectangle();
-        if(this.pointInRectangle(ball.position, playerRectangle)){
+    hit(circle: Circle, rectangle: Rectangle): boolean{
+        if(this.pointInRectangle(circle.point, rectangle)){
             return true;
         }
 
-        let leftTop: Vector2 = new Vector2(playerRectangle.x, playerRectangle.y);
-        let rightTop: Vector2 = new Vector2(playerRectangle.x + playerRectangle.width, playerRectangle.y);
-        let leftBottom: Vector2 = new Vector2(playerRectangle.x, playerRectangle.y + playerRectangle.height);
-        let rightBottom: Vector2 = new Vector2(playerRectangle.x + playerRectangle.width, playerRectangle.y + playerRectangle.height);
+        let leftTop: Vector2 = new Vector2(rectangle.x, rectangle.y);
+        let rightTop: Vector2 = new Vector2(rectangle.x + rectangle.width, rectangle.y);
+        let leftBottom: Vector2 = new Vector2(rectangle.x, rectangle.y + rectangle.height);
+        let rightBottom: Vector2 = new Vector2(rectangle.x + rectangle.width, rectangle.y + rectangle.height);
 
         let topSegment: Segment = new Segment(leftTop, rightTop);
         let rightSegment: Segment = new Segment(rightTop, rightBottom);
         let bottomSegment: Segment = new Segment(leftBottom, rightBottom);
         let leftSegmebnt: Segment = new Segment(leftTop, leftBottom);
 
-        if(this.intersects(topSegment, ball)) return true;
-        if(this.intersects(rightSegment, ball)) return true;
-        if(this.intersects(bottomSegment, ball)) return true;
-        if(this.intersects(leftSegmebnt, ball)) return true;
+        if(this.intersects(topSegment, circle)) return true;
+        if(this.intersects(rightSegment, circle)) return true;
+        if(this.intersects(bottomSegment, circle)) return true;
+        if(this.intersects(leftSegmebnt, circle)) return true;
         return false;
     }
 
@@ -38,8 +36,8 @@ export class HitDetection{
         return false;
     }
 
-    intersects(segment: Segment, ball: Ball): boolean{
-        if(this.segmentDistanceToPoint(segment, ball.position) <= ball.radius){
+    intersects(segment: Segment, circle: Circle): boolean{
+        if(this.segmentDistanceToPoint(segment, circle.point) <= circle.radius){
             return true;
         }
         return false;
