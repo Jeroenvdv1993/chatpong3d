@@ -23,8 +23,11 @@ export class Pong{
         if(this.run){
             this.ball.update();
             // top and bottom wall
-            if(this.ball.position.y < 0 ||this.ball.position.y > 256){
-                this.ball.direction.y = -this.ball.direction.y;
+            if(this.ball.position.y < 0){
+                this.ball.direction.y = Math.abs(this.ball.direction.y);
+            }
+            else if(this.ball.position.y > 256){
+                this.ball.direction.y = -Math.abs(this.ball.direction.y);
             }
             this.player1.update();
             this.player2.update();
