@@ -55,6 +55,7 @@ export class Pong{
         this.ball.direction.x = -this.ball.direction.x;
         this.ball.direction.y = -Math.sin(bounceAngle);
         this.ball.direction.normalize();
+        this.ball.speed = 5;
     }
     stopGame(){
         this.run = false;
@@ -64,14 +65,17 @@ export class Pong{
         if(player1Scored){
             this.player1.score += 1;
             this.ball.direction = new Vector2(1, 0);
+            this.ball.speed = 1;
         }
         else{
             this.player2.score += 1;
             this.ball.direction = new Vector2(-1, 0);
+            this.ball.speed = 1;
         }
         io.emit('score', this.player1.score, this.player2.score);
     }
     resetGame(io: socketIO.Server){
+        this.ball.speed = 1;
         this.ball.position = new Vector2(127, 127);
         this.ball.direction = new Vector2(1, 0);
         this.player1.score = 0;
