@@ -67,8 +67,6 @@ export class Pong{
             this.ball.direction = new Vector2(-1, 0);
         }
         io.emit('score', this.player1.score, this.player2.score);
-        this.player1.position = new Vector2(4, 127);
-        this.player2.position = new Vector2(252, 127);
     }
     resetGame(io: socketIO.Server){
         this.ball.position = new Vector2(127, 127);
