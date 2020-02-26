@@ -1,70 +1,82 @@
 import { Ball } from './ball';
 import { Player } from './player';
 import { Vector2 } from './vector2';
+import { HitDetection} from './hitdetection';
+import socketIO from 'socket.io';
 
+const MAXBOUNCEANGLE: number = 5 * Math.PI / 12; // 75 degrees
 export class Pong{
     run: boolean = false;
-    ball: Ball = new Ball(new Vector2(127, 127), new Vector2(5, 0));
-    player1: Player = new Player(new Vector2(0, 0));
-    player2: Player = new Player(new Vector2(248, 0));
-    player1Hit: boolean = false;
-    player2Hit: boolean = false;
+    ball: Ball = new Ball(new Vector2(127, 127), new Vector2(1, 0));
+    player1: Player = new Player(new Vector2(4, 127));
+    player2: Player = new Player(new Vector2(252, 127));
+    hitDetection: HitDetection = new HitDetection();
     constructor(){
     }
 
-    startGame(){
+    startGame(io: socketIO.Server){
+        this.resetGame(io);
         this.run = true;
     }
 
-    update(){
+    update(io: socketIO.Server){
         if(this.run){
             this.ball.update();
+            // top and bottom wall
+            if(this.ball.position.y < 0 ||this.ball.position.y > 256){
+                this.ball.direction.y = -this.ball.direction.y;
+            }
             this.player1.update();
             this.player2.update();
-            this.hit();
+            this.hit(io);
         }
     }
-    hit(){
-        if(this.ball.position.y >= this.player1.position.y
-            && this.ball.position.y <= this.player1.position.y + this.player1.size.y
-            && this.ball.position.x <= this.player1.position.x
-            && this.player1Hit === false){
-                console.log("player 1 hit");
-                this.player2Hit = false;
-                this.player1Hit = true;
-                this.changeBallPlayer(this.player1);
+    hit(io: socketIO.Server){
+        if(this.hitDetection.hit(this.ball, this.player1)){
+            this.changeBallPlayer(this.player1);
         }
-        else if(this.ball.position.y >= this.player2.position.y
-        && this.ball.position.y <= this.player2.position.y + this.player2.size.y
-        && this.ball.position.x >= this.player2.position.x + this.player2.size.x
-        && this.player2Hit === false){
-            console.log("player 2 hit");
-            this.player2Hit = true;
-            this.player1Hit = false;
+        else if(this.hitDetection.hit(this.ball, this.player2)){
             this.changeBallPlayer(this.player2);
         }
-        else if(this.ball.position.x < 0 ||this.ball.position.x >= 256){
-            console.log("reset");
-            this.resetBall();
+        else if(this.ball.position.x >= 256){
+            this.resetBall(true, io);
+        }
+        else if(this.ball.position.x < 0){
+            this.resetBall(false, io);
         }
     }
     changeBallPlayer(player: Player){
-        let collidePoint = (this.ball.position.y - (player.position.y + player.size.y));
-        let angleRad = Math.PI / 4 * collidePoint;
-        let direction: number = -1;
-        // to do if ball hits bottom side of the paddle direction = 1
-        console.log(direction * Math.cos(angleRad));
-        this.ball.speed.x = direction * 5 * Math.cos(angleRad);
-        this.ball.speed.y = 5 * Math.sin(angleRad);
-
+        let relativeIntersectY = player.position.y - this.ball.position.y;
+        let normalizedRelativeIntersectionY = (relativeIntersectY/ (player.size.y / 2) );
+        let bounceAngle = normalizedRelativeIntersectionY * MAXBOUNCEANGLE;
+        this.ball.direction.x = -this.ball.direction.x;
+        this.ball.direction.y = -Math.sin(bounceAngle);
+        this.ball.direction.normalize();
     }
     stopGame(){
         this.run = false;
     }
-    resetBall(){
+    resetBall(player1Scored: boolean, io: socketIO.Server){
         this.ball.position = new Vector2(127, 127);
-        this.ball.speed = new Vector2(5, 0);
-        this.player1Hit = false;
-        this.player2Hit = false;
+        if(player1Scored){
+            this.player1.score += 1;
+            this.ball.direction = new Vector2(1, 0);
+        }
+        else{
+            this.player2.score += 1;
+            this.ball.direction = new Vector2(-1, 0);
+        }
+        io.emit('score', this.player1.score, this.player2.score);
+        this.player1.position = new Vector2(4, 127);
+        this.player2.position = new Vector2(252, 127);
+    }
+    resetGame(io: socketIO.Server){
+        this.ball.position = new Vector2(127, 127);
+        this.ball.direction = new Vector2(1, 0);
+        this.player1.score = 0;
+        this.player2.score = 0;
+        io.emit('score', this.player1.score, this.player2.score);
+        this.player1.position = new Vector2(4, 127);
+        this.player2.position = new Vector2(252, 127);
     }
 }

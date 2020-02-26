@@ -22,10 +22,17 @@ socket.on('is_online', function(username: string){
 })
 
 // canvas
-const canvas = <HTMLCanvasElement | null> document.getElementById('dot');
+const canvas = <HTMLCanvasElement | null> document.getElementById('pong');
+const player1 = document.getElementById('player1');
+const player2 = document.getElementById('player2');
+if(player1 !== null && player2 !== null){
+    socket.on('score', function(player1Score: number, player2Score: number){
+        player1.innerHTML = `${player1Score}`;
+        player2.innerHTML = `${player2Score}`;
+    })
+}
 if(canvas !== null){
     const context = canvas.getContext('2d');
-    const radius = 10;
     
     // clients
     if(context !== null){
@@ -41,15 +48,23 @@ if(canvas !== null){
             context.strokeStyle = "#000000";
             context.strokeRect(0,0, canvas.width, canvas.height);
             context.beginPath();
-            context.arc(pong.ball.position.x, pong.ball.position.y, 8, 0, 2* Math.PI, false);
+            context.arc(pong.ball.position.x, pong.ball.position.y, pong.ball.radius, 0, 2* Math.PI, false);
             context.fillStyle = 'black';
             context.fill();
             context.beginPath();
-            context.rect(pong.player1.position.x, pong.player1.position.y, pong.player1.size.x, pong.player1.size.y);
+            context.rect(
+                pong.player1.position.x - pong.player1.size.x / 2, 
+                pong.player1.position.y - pong.player1.size.y / 2, 
+                pong.player1.size.x, 
+                pong.player1.size.y);
             context.fillStyle = 'black';
             context.fill();
             context.beginPath();
-            context.rect(pong.player2.position.x, pong.player2.position.y, pong.player2.size.x, pong.player2.size.y);
+            context.rect(
+                pong.player2.position.x - pong.player2.size.x / 2, 
+                pong.player2.position.y - pong.player2.size.y / 2, 
+                pong.player2.size.x, 
+                pong.player2.size.y);
             context.fillStyle = 'black';
             context.fill();
         });

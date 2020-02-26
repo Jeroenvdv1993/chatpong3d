@@ -46,7 +46,7 @@ app.get('/', function(req, res){
     res.sendFile(path.join(__dirname + "/views/html/home.html"));
 });
 
-const io = socketIO(server);
+const io: socketIO.Server = socketIO(server);
 
 //------
 // Code
@@ -55,7 +55,7 @@ let clients: Client[] = [];
 let id: number = 0;
 let pong: Pong = new Pong();
 function update(){
-    pong.update();
+    pong.update(io);
     io.emit('update', pong);
 }
 setInterval(update, 20);
@@ -74,7 +74,7 @@ io.on('connection', (socket: any) =>{
         // Activate pong
         if(clients.length >= 2){
             console.log("starting pong");
-            pong.startGame();
+            pong.startGame(io);
         }
     });
 
