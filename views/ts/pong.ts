@@ -2,7 +2,7 @@ import {Pong} from '../../src/pong/pong';
 import * as THREE from 'three';
 
 var socket = io();
-socket.emit('pong_player');
+socket.emit('pong_connect');
 
 // THREE JS
 let scene = new THREE.Scene();
