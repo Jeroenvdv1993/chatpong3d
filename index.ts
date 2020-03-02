@@ -6,6 +6,7 @@ import { ChatClient } from './src/chatclient';
 import { Pong } from './src/pong/pong';
 import { PongClient } from './src/pongclient';
 import { CardClient} from './src/cardclient';
+import fs from 'fs';
 
 //-------
 // Setup
@@ -29,6 +30,9 @@ app.get('/js/bootstrap.min.js.map', function(req, res){
 app.get('/js/jquery-3.4.1.min.js', function(req, res){
     res.sendFile(path.join(__dirname + "/views/js/jquery-3.4.1.min.js"));
 })
+app.get('/ts/home.js', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/ts/home.js"));
+});
 app.get('/ts/chat.js', function(req, res){
     res.sendFile(path.join(__dirname + "/views/ts/chat.js"));
 });
@@ -92,6 +96,31 @@ app.get('/img/cardgame/cs_3.jpg', function(req, res){
 });
 app.get('/img/cardgame/cs_4.jpg', function(req, res){
     res.sendFile(path.join(__dirname + "/views/img/cardgame/cs_4.jpg"));
+});
+
+//////////
+// TEXT //
+//////////
+app.post('/save', function(req, res){
+    let body = '';
+    let filePath = __dirname + "/views/txt/data.txt";
+    req.on('data', function(data){
+        body += data;
+    });
+
+    req.on('end', function(){
+        fs.writeFile(filePath, body, function(){
+            res.writeHead(200, {
+                'Content-Length': body.length,
+                'Content-Type': "text/plain"
+            });
+            res.write(body);
+            res.end();
+        });
+    });
+});
+app.get('/txt/data.txt', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/txt/data.txt"));
 });
 
 ///////////
