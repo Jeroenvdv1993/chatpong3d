@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "prestart": "tsc && browserify views/ts/home.js -o views/ts/home.js",
+    "prestart": "tsc && browserify views/ts/home.js -o views/ts/home.js && browserify views/ts/pong.js -o views/ts/pong.js",
     "start": "ts-node index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

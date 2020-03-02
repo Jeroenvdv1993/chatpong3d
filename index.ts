@@ -2,8 +2,9 @@ import express from 'express';
 import path from 'path';
 import socketIO from 'socket.io';
 import http from 'http';
-import {Client} from './src/client';
+import { ChatClient } from './src/chatclient';
 import { Pong } from './src/pong/pong';
+import { PongClient } from './src/pongclient';
 
 //-------
 // Setup
@@ -33,17 +34,20 @@ app.get('/js/jquery-3.4.1.min.js', function(req, res){
 app.get('/css/home.css', function(req, res){
     res.sendFile(path.join(__dirname + "/views/css/home.css"));
 });
+app.get('/css/pong.css', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/css/pong.css"));
+});
 app.get('/ts/home.js', function(req, res){
     res.sendFile(path.join(__dirname + "/views/ts/home.js"));
 });
-app.get('/ts/helloworld.js', function(req, res){
-    res.sendFile(path.join(__dirname + "/views/ts/helloworld.js"));
-});
-app.get('/ts/test.js', function(req, res){
-    res.sendFile(path.join(__dirname + "/views/ts/test.js"));
+app.get('/ts/pong.js', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/ts/pong.js"));
 });
 app.get('/', function(req, res){
     res.sendFile(path.join(__dirname + "/views/html/home.html"));
+});
+app.get('/pong', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/html/pong.html"));
 });
 
 const io: socketIO.Server = socketIO(server);
@@ -51,9 +55,11 @@ const io: socketIO.Server = socketIO(server);
 //------
 // Code
 //------
-let clients: Client[] = [];
+let chatClients: ChatClient[] = [];
+let pongClients: PongClient[] = [];
 let id: number = 0;
 let pong: Pong = new Pong();
+
 function update(){
     pong.update(io);
     io.emit('update', pong);
@@ -63,42 +69,51 @@ setInterval(update, 20);
 io.on('connection', (socket: any) =>{
     socket.on('username', function(username: string){
         socket.id = id;
-        clients.push(new Client(id, username, 5, 5));
+        chatClients.push(new ChatClient(id, username));
         id++;
         var today = new Date();
         var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
         var print = '<strong>[' + time + ']</strong>' + '<i>' + username + ' joined the chat...</i>';
         io.emit('is_online', print);
-        io.emit('clients', clients);
+        io.emit('clients', chatClients);
 
+    });
+    socket.on('pong_player', function(){
+        socket.id = id;
+        pongClients.push(new PongClient(id));
+        id++;
         // Activate pong
-        if(clients.length >= 2){
-            console.log("starting pong");
+        if(pongClients.length >= 2){
             pong.startGame(io);
+        }
+    })
+
+    socket.on('disconnect', function(){
+        if(isChatClient()){
+            findChatClient(function(index: number){
+                let username: string = chatClients[index].username;
+                chatClients.splice(index, 1);
+                var today = new Date();
+                var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+                var print = '<strong>[' + time + ']</strong>' + '<i>' + username + ' left the chat...</i>';
+                io.emit('is_online', print);
+                io.emit('clients', chatClients);
+            });
+        }
+        else if(isPongClient()){
+            findPongClient(function(index: number){
+                pongClients.splice(index, 1);
+                // Deactivate pong
+                if(pongClients.length < 2){
+                    pong.stopGame();
+                }
+            })
         }
     });
 
-    socket.on('disconnect', function(){
-        findClient(function(index: number){
-            let username: string = clients[index].username;
-            clients.splice(index, 1);
-            var today = new Date();
-            var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
-            var print = '<strong>[' + time + ']</strong>' + '<i>' + username + ' left the chat...</i>';
-            io.emit('is_online', print);
-            io.emit('clients', clients);
-
-            // Deactivate pong
-            if(clients.length < 2){
-                console.log("stopping pong");
-                pong.stopGame();
-            }
-        });
-    });
-
     socket.on('chat_message', function(message: string){
-        findClient(function(index: number){
-            let username: string = clients[index].username;
+        findChatClient(function(index: number){
+            let username: string = chatClients[index].username;
             var today = new Date();
             var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
             var print = '<strong>[' + time + ']</strong>' +'<strong>' + username +"</strong>: " + message
@@ -107,7 +122,7 @@ io.on('connection', (socket: any) =>{
     });
 
     socket.on('move_down', function(){
-        findClient(function(index: number){
+        findPongClient(function(index: number){
             if(pong.run){
                 if(index === 0){
                     pong.player1.moveDown();
@@ -119,7 +134,7 @@ io.on('connection', (socket: any) =>{
         });
     })
     socket.on('move_up', function(){
-        findClient(function(index: number){
+        findPongClient(function(index: number){
             if(pong.run){
                 if(index === 0){
                     pong.player1.moveUp();
@@ -131,7 +146,7 @@ io.on('connection', (socket: any) =>{
         });
     })
     socket.on('move_stop', function(){
-        findClient(function(index: number){
+        findPongClient(function(index: number){
             if(pong.run){
                 if(index === 0){
                     pong.player1.stopMoving();
@@ -143,9 +158,27 @@ io.on('connection', (socket: any) =>{
         });
     })
 
-    function findClient(execute: any){
-        let index: number = clients.findIndex(client => client.id === socket.id);
+    function findChatClient(execute: any){
+        let index: number = chatClients.findIndex(client => client.id === socket.id);
         if(index !== -1) execute(index);
+    }
+
+    function isChatClient():boolean{
+        let index: number = chatClients.findIndex(client => client.id === socket.id);
+        if(index !== -1) return true;
+        return false;
+    }
+
+    function findPongClient(execute: any){
+        let index: number = pongClients.findIndex(client => client.id === socket.id);
+        if(index !== -1) execute(index);
+
+    }
+
+    function isPongClient(): boolean{
+        let index: number = pongClients.findIndex(client => client.id === socket.id);
+        if(index !== -1) return true;
+        return false;
     }
 })
 
