@@ -63,7 +63,7 @@ if(player1 !== null && player2 !== null){
     })
 }
 if(pong3DElement !== null){
-    socket.on('update', function(pong: Pong){
+    socket.on('pong_update', function(pong: Pong){
         // Draw 3D
         //console.log(pong.player1.position);
         cube1.position.x = pong.player1.position.x;

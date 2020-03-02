@@ -7,6 +7,7 @@ import { Pong } from './src/pong/pong';
 import { PongClient } from './src/pongclient';
 import { CardClient} from './src/cardclient';
 import fs from 'fs';
+import { Cardgame } from './src/cardgame/cardgame';
 
 //-------
 // Setup
@@ -147,12 +148,13 @@ const io: socketIO.Server = socketIO(server);
 let chatClients: ChatClient[] = [];
 let pongClients: PongClient[] = [];
 let cardClients: CardClient[] = []
-let id: number = 0;
+let clientID: number = 0;
 let pong: Pong = new Pong();
+let cardgame: Cardgame = new Cardgame();
 
 function update(){
     pong.update(io);
-    io.emit('update', pong);
+    io.emit('pong_update', pong);
 }
 setInterval(update, 20);
 
@@ -161,9 +163,9 @@ io.on('connection', (socket: any) =>{
     // CONNECT AND DISCONNECT //
     ////////////////////////////
     socket.on('chat_connect', function(username: string){
-        socket.id = id;
-        chatClients.push(new ChatClient(id, username));
-        id++;
+        socket.clientID = clientID;
+        chatClients.push(new ChatClient(clientID, username));
+        clientID++;
         var today = new Date();
         var print = '<strong>[' + timeToString(today) + ']</strong>' + '<i>' + username + ' joined the chat...</i>';
         io.emit('chat_online', print);
@@ -171,24 +173,31 @@ io.on('connection', (socket: any) =>{
 
     });
     socket.on('pong_connect', function(){
-        socket.id = id;
-        pongClients.push(new PongClient(id));
-        id++;
+        socket.clientID = clientID;
+        pongClients.push(new PongClient(clientID));
+        clientID++;
         // Activate pong
         if(pongClients.length >= 2){
             pong.startGame(io);
         }
     });
     socket.on('card_connect', function(){
-        socket.id = id;
-        cardClients.push(new CardClient(id));
-        id++
-        
+        socket.clientID = clientID;
+        //only push to the created socket the id it uses (don't emit to all sockets)
+        io.to(socket.id).emit('client_id', clientID);
+        // Create new cardclient and increment id
+        cardClients.push(new CardClient(clientID));
+        clientID++;
+        // Activate card game
+        if(cardClients.length >= 2){
+            cardgame.startGame(cardClients[0].id, cardClients[1].id);
+            io.emit('card_reset', cardgame);
+        }
     });
     socket.on('disconnect', function(){
-        let chatIndex = chatClients.findIndex(client => client.id === socket.id);
-        let pongIndex = pongClients.findIndex(client => client.id === socket.id);
-        let cardIndex = cardClients.findIndex(client => client.id === socket.id);
+        let chatIndex = chatClients.findIndex(client => client.id === socket.clientID);
+        let pongIndex = pongClients.findIndex(client => client.id === socket.clientID);
+        let cardIndex = cardClients.findIndex(client => client.id === socket.clientID);
         if(chatIndex !== -1){
             let username: string = chatClients[chatIndex].username;
             chatClients.splice(chatIndex, 1);
@@ -206,6 +215,10 @@ io.on('connection', (socket: any) =>{
         }
         else if(cardIndex !== -1){
             cardClients.splice(cardIndex, 1);
+            // Deactivate card game
+            if(cardClients.length < 2){
+                cardgame.stopGame();
+            }
         }
     });
 
@@ -213,7 +226,7 @@ io.on('connection', (socket: any) =>{
     // CHAT //
     //////////
     socket.on('chat_message', function(message: string){
-        let chatIndex = chatClients.findIndex(client => client.id === socket.id);
+        let chatIndex = chatClients.findIndex(client => client.id === socket.clientID);
         if(chatIndex !== -1){
             let username: string = chatClients[chatIndex].username;
             var today = new Date();
@@ -246,7 +259,7 @@ io.on('connection', (socket: any) =>{
     // PONG //
     //////////
     socket.on('pong_move_down', function(){
-        let pongIndex = pongClients.findIndex(client => client.id === socket.id);
+        let pongIndex = pongClients.findIndex(client => client.id === socket.clientID);
         if(pongIndex !== -1 && pong.run){
             if(pongIndex === 0){
                 pong.player1.moveDown();
@@ -257,7 +270,7 @@ io.on('connection', (socket: any) =>{
         };
     })
     socket.on('pong_move_up', function(){
-        let pongIndex = pongClients.findIndex(client => client.id === socket.id);
+        let pongIndex = pongClients.findIndex(client => client.id === socket.clientID);
         if(pongIndex !== -1 && pong.run){
             if(pongIndex === 0){
                 pong.player1.moveUp();
@@ -268,7 +281,7 @@ io.on('connection', (socket: any) =>{
         };
     })
     socket.on('pong_move_stop', function(){
-        let pongIndex = pongClients.findIndex(client => client.id === socket.id);
+        let pongIndex = pongClients.findIndex(client => client.id === socket.clientID);
         if(pongIndex !== -1 && pong.run){
             if(pongIndex === 0){
                 pong.player1.stopMoving();
