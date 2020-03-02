@@ -5,6 +5,7 @@ import http from 'http';
 import { ChatClient } from './src/chatclient';
 import { Pong } from './src/pong/pong';
 import { PongClient } from './src/pongclient';
+import { CardClient} from './src/cardclient';
 
 //-------
 // Setup
@@ -116,6 +117,7 @@ const io: socketIO.Server = socketIO(server);
 //------
 let chatClients: ChatClient[] = [];
 let pongClients: PongClient[] = [];
+let cardClients: CardClient[] = []
 let id: number = 0;
 let pong: Pong = new Pong();
 
@@ -126,6 +128,9 @@ function update(){
 setInterval(update, 20);
 
 io.on('connection', (socket: any) =>{
+    ////////////////////////////
+    // CONNECT AND DISCONNECT //
+    ////////////////////////////
     socket.on('chat_connect', function(username: string){
         socket.id = id;
         chatClients.push(new ChatClient(id, username));
@@ -144,11 +149,17 @@ io.on('connection', (socket: any) =>{
         if(pongClients.length >= 2){
             pong.startGame(io);
         }
-    })
-
+    });
+    socket.on('card_connect', function(){
+        socket.id = id;
+        cardClients.push(new CardClient(id));
+        id++
+        
+    });
     socket.on('disconnect', function(){
         let chatIndex = chatClients.findIndex(client => client.id === socket.id);
         let pongIndex = pongClients.findIndex(client => client.id === socket.id);
+        let cardIndex = cardClients.findIndex(client => client.id === socket.id);
         if(chatIndex !== -1){
             let username: string = chatClients[chatIndex].username;
             chatClients.splice(chatIndex, 1);
@@ -164,8 +175,14 @@ io.on('connection', (socket: any) =>{
                 pong.stopGame();
             }
         }
+        else if(cardIndex !== -1){
+            cardClients.splice(cardIndex, 1);
+        }
     });
 
+    //////////
+    // CHAT //
+    //////////
     socket.on('chat_message', function(message: string){
         let chatIndex = chatClients.findIndex(client => client.id === socket.id);
         if(chatIndex !== -1){
@@ -175,40 +192,6 @@ io.on('connection', (socket: any) =>{
             io.emit('chat_message', print);
         }
     });
-
-    socket.on('move_down', function(){
-        let pongIndex = pongClients.findIndex(client => client.id === socket.id);
-        if(pongIndex !== -1 && pong.run){
-            if(pongIndex === 0){
-                pong.player1.moveDown();
-            }
-            else if(pongIndex === 1){
-                pong.player2.moveDown();
-            }
-        };
-    })
-    socket.on('move_up', function(){
-        let pongIndex = pongClients.findIndex(client => client.id === socket.id);
-        if(pongIndex !== -1 && pong.run){
-            if(pongIndex === 0){
-                pong.player1.moveUp();
-            }
-            else if(pongIndex === 1){
-                pong.player2.moveUp();
-            }
-        };
-    })
-    socket.on('move_stop', function(){
-        let pongIndex = pongClients.findIndex(client => client.id === socket.id);
-        if(pongIndex !== -1 && pong.run){
-            if(pongIndex === 0){
-                pong.player1.stopMoving();
-            }
-            else if(pongIndex === 1){
-                pong.player2.stopMoving();
-            }
-        }
-    })
 
     function timeToString(today: Date){
         let time = addZeroBeforeNumber(today.getHours());
@@ -229,5 +212,47 @@ io.on('connection', (socket: any) =>{
         }
         return result;
     }
+
+    //////////
+    // PONG //
+    //////////
+    socket.on('pong_move_down', function(){
+        let pongIndex = pongClients.findIndex(client => client.id === socket.id);
+        if(pongIndex !== -1 && pong.run){
+            if(pongIndex === 0){
+                pong.player1.moveDown();
+            }
+            else if(pongIndex === 1){
+                pong.player2.moveDown();
+            }
+        };
+    })
+    socket.on('pong_move_up', function(){
+        let pongIndex = pongClients.findIndex(client => client.id === socket.id);
+        if(pongIndex !== -1 && pong.run){
+            if(pongIndex === 0){
+                pong.player1.moveUp();
+            }
+            else if(pongIndex === 1){
+                pong.player2.moveUp();
+            }
+        };
+    })
+    socket.on('pong_move_stop', function(){
+        let pongIndex = pongClients.findIndex(client => client.id === socket.id);
+        if(pongIndex !== -1 && pong.run){
+            if(pongIndex === 0){
+                pong.player1.stopMoving();
+            }
+            else if(pongIndex === 1){
+                pong.player2.stopMoving();
+            }
+        }
+    })
+
+    //////////////
+    // CARDGAME //
+    //////////////
+
 })
 

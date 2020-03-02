@@ -114,12 +114,12 @@ document.onkeydown = document.onkeyup = function(e){
     e = e ||event; // to deal with IE
     map[e.keyCode] = e.type === 'keydown';
     if(map[90]){
-        socket.emit('move_up');
+        socket.emit('pong_move_up');
     }
     else if(map[83]){
-        socket.emit('move_down');
+        socket.emit('pong_move_down');
     }
     else{
-        socket.emit('move_stop');
+        socket.emit('pong_move_stop');
     }
 }
