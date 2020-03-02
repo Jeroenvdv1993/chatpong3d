@@ -295,6 +295,10 @@ io.on('connection', (socket: any) =>{
     //////////////
     // CARDGAME //
     //////////////
+    socket.on('card_end_turn', function(){
+        cardgame.endTurn();
+        io.emit('card_switch', cardgame);
+    })
 
 })
 
