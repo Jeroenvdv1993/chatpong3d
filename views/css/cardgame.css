@@ -1,0 +1,18 @@
+ul{
+    white-space: nowrap;
+    overflow-y: hidden;
+    overflow-x: scroll;
+    width: 256px;
+    height: 128px;
+}
+img{
+    width: 64px;
+    height: 90px;
+}
+li{
+    display: inline;
+}
+.offsetDiv{
+    width: 128px;
+    height: 128px;
+}

@@ -16,12 +16,9 @@ let server: http.Server = http.createServer(app);
 
 server.listen(PORT, () => console.log(`Listening on ${PORT}`));
 
-app.get('/css/bootstrap.min.css', function(req, res){
-    res.sendFile(path.join(__dirname + "/views/css/bootstrap.min.css"));
-})
-app.get('/css/bootstrap.min.css.map', function(req, res){
-    res.sendFile(path.join(__dirname + "/views/css/bootstrap.min.css.map"));
-})
+////////////////
+// JAVASCRIPT //
+////////////////
 app.get('/js/bootstrap.min.js', function(req, res){
     res.sendFile(path.join(__dirname + "/views/js/bootstrap.min.js"));
 })
@@ -31,18 +28,74 @@ app.get('/js/bootstrap.min.js.map', function(req, res){
 app.get('/js/jquery-3.4.1.min.js', function(req, res){
     res.sendFile(path.join(__dirname + "/views/js/jquery-3.4.1.min.js"));
 })
-app.get('/css/chat.css', function(req, res){
-    res.sendFile(path.join(__dirname + "/views/css/chat.css"));
-});
-app.get('/css/pong.css', function(req, res){
-    res.sendFile(path.join(__dirname + "/views/css/pong.css"));
-});
 app.get('/ts/chat.js', function(req, res){
     res.sendFile(path.join(__dirname + "/views/ts/chat.js"));
 });
 app.get('/ts/pong.js', function(req, res){
     res.sendFile(path.join(__dirname + "/views/ts/pong.js"));
 });
+app.get('/ts/cardgame.js', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/ts/cardgame.js"));
+});
+
+/////////
+// CSS //
+/////////
+app.get('/css/bootstrap.min.css', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/css/bootstrap.min.css"));
+})
+app.get('/css/bootstrap.min.css.map', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/css/bootstrap.min.css.map"));
+})
+app.get('/css/chat.css', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/css/chat.css"));
+});
+app.get('/css/pong.css', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/css/pong.css"));
+});
+app.get('/css/cardgame.css', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/css/cardgame.css"));
+});
+////////////
+// IMAGES //
+////////////
+app.get('/img/cardgame/c_0.jpg', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/img/cardgame/c_0.jpg"));
+});
+app.get('/img/cardgame/c_1.jpg', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/img/cardgame/c_1.jpg"));
+});
+app.get('/img/cardgame/c_2.jpg', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/img/cardgame/c_2.jpg"));
+});
+app.get('/img/cardgame/c_3.jpg', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/img/cardgame/c_3.jpg"));
+});
+app.get('/img/cardgame/c_4.jpg', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/img/cardgame/c_4.jpg"));
+});
+app.get('/img/cardgame/cb_0.jpg', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/img/cardgame/cb_0.jpg"));
+});
+app.get('/img/cardgame/cs_0.jpg', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/img/cardgame/cs_0.jpg"));
+});
+app.get('/img/cardgame/cs_1.jpg', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/img/cardgame/cs_1.jpg"));
+});
+app.get('/img/cardgame/cs_2.jpg', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/img/cardgame/cs_2.jpg"));
+});
+app.get('/img/cardgame/cs_3.jpg', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/img/cardgame/cs_3.jpg"));
+});
+app.get('/img/cardgame/cs_4.jpg', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/img/cardgame/cs_4.jpg"));
+});
+
+///////////
+// PAGES //
+///////////
 app.get('/', function(req, res){
     res.sendFile(path.join(__dirname + "/views/html/home.html"));
 });
@@ -51,6 +104,9 @@ app.get('/chat', function(req, res){
 });
 app.get('/pong', function(req, res){
     res.sendFile(path.join(__dirname + "/views/html/pong.html"));
+});
+app.get('/cardgame', function(req, res){
+    res.sendFile(path.join(__dirname + "/views/html/cardgame.html"));
 });
 
 const io: socketIO.Server = socketIO(server);
