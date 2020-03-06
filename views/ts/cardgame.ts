@@ -15,6 +15,10 @@ let opponent: Player | null = null;
 let clientID: number = -1;
 let viewer: boolean = false;
 
+let selectedUL: HTMLElement | null = null;
+let selectedImg: HTMLElement | null = null;
+let selectedIndex: number |null = null;
+
 socket.on('client_id', function(id: number){
     clientID = id;
 })
@@ -29,7 +33,7 @@ socket.on('card_reset', function(cardgame: Cardgame){
                 endTurnDiv.hidden = true;
             }
         }
-        updateLists();
+        updateLists(cardgame);
     }
     else{
         if(endTurnDiv !== null){
@@ -37,6 +41,10 @@ socket.on('card_reset', function(cardgame: Cardgame){
         }
         updateListsViewer();
     }
+    
+    selectedUL = null;
+    selectedImg = null;
+    selectedIndex = null;
 })
 
 socket.on('card_switch', function(cardgame: Cardgame){
@@ -44,7 +52,7 @@ socket.on('card_switch', function(cardgame: Cardgame){
         endTurnDiv.hidden = false;
     }
     getPlayers(cardgame);
-    if(!viewer) updateLists();
+    if(!viewer) updateLists(cardgame);
     else updateListsViewer();
 })
 
@@ -79,7 +87,7 @@ function getPlayers(cardgame: Cardgame){
         viewer = true;
     }
 }
-function updateLists(){
+function updateLists(cardgame: Cardgame){
     if(handUL !== null && player !== null){
         clearUL(handUL);
         for(let index: number = 0; index < player.hand.length; index++){
@@ -87,6 +95,9 @@ function updateLists(){
             img.classList.add("img-fluid");
             img.src = `/img/cardgame/c_${player.hand[index].id}.jpg`;
             let li = document.createElement('li');
+            li.onclick = function(){
+                selectCard(handUL, index, cardgame);
+            }
             li.appendChild(img);
             handUL.appendChild(li);
         }
@@ -137,5 +148,39 @@ function updateListsViewer(){
     }
     if(opponentHandLengthSpan !== null && opponent !== null){
         opponentHandLengthSpan.innerText = `${opponent.hand.length}`;
+    }
+}
+
+function selectCard(ul: HTMLElement |null, index: number, cardgame: Cardgame){
+    if(ul !== null){
+        let li: HTMLElement | null = ul.getElementsByTagName("li")[index];
+        if(li !== null){
+            let img: HTMLElement | null = li.getElementsByTagName("img")[0];
+            if(img !== null && cardgame.currentPlayer?.id === clientID){
+                if(selectedImg !== null){
+                    switchImageSelection(selectedImg);
+                }
+                switchImageSelection(img);
+                selectedUL = ul;
+                selectedImg = img;
+                selectedIndex = index;
+            }
+        }
+    }
+}
+
+function switchImageSelection(imgNode: any){
+    let origSrc: string = imgNode.src;
+    let dashPos: number = origSrc.lastIndexOf("/");
+    if(dashPos >= 0 && dashPos < origSrc.length){
+        let path: string = origSrc.substr(0, dashPos + 1);
+        let filename: string = origSrc.substr(dashPos + 1);
+        if(filename.slice(0,3) == "cs_"){
+            filename = filename.slice(0,1) + filename.substr(2);
+        }
+        else if(filename.slice(0,2) == "c_"){
+            filename = filename.slice(0,1) + 's' + filename.substr(1);
+        }
+        imgNode.src = path + filename;
     }
 }
