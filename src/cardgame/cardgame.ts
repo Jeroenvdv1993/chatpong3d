@@ -25,6 +25,9 @@ export class Cardgame{
         this.player2.shuffle();
         this.player2.draw(3);
     }
+    playCard(index: number){
+        this.currentPlayer?.play(index);
+    }
     stopGame(){
         this.run = false;
     }

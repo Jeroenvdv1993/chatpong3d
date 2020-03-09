@@ -10,6 +10,10 @@ let opponentHandUL: HTMLElement | null = document.getElementById("opponentHand")
 let handLengthSpan: HTMLElement | null = document.getElementById("handLength");
 let opponentHandLengthSpan: HTMLElement | null = document.getElementById("opponentHandLength");
 let endTurnDiv : HTMLElement | null = document.getElementById("endTurn");
+let playUL: HTMLElement | null = document.getElementById("play");
+let opponentPlayUL: HTMLElement | null = document.getElementById("opponentPlay");
+let playLengthSpan: HTMLElement | null = document.getElementById("playLength");
+let opponentPlayLengthSpan: HTMLElement | null = document.getElementById("opponentPlayLength");
 let player: Player | null = null;
 let opponent: Player | null = null;
 let clientID: number = -1;
@@ -76,10 +80,39 @@ function getPlayers(cardgame: Cardgame){
     if(cardgame.player1.id === clientID){
         player = cardgame.player1;
         opponent = cardgame.player2;
+
+        if(playUL != null){
+            playUL.onclick = function(){
+                if(selectedIndex !== null){
+                    console.log(`Playing index in hand: ${0}`, selectedIndex)
+                    socket.emit('card_play_card', selectedIndex);
+                    //cardgame.playCard(selectedIndex);
+
+                    if(selectedImg !== null){
+                        switchImageSelection(selectedImg);
+                    }
+                    selectedUL = null;
+                    selectedImg = null;
+                    selectedIndex = null;
+                }
+            };
+        }
     }
     else if(cardgame.player2.id === clientID){
         player = cardgame.player2;
         opponent = cardgame.player1;
+
+        if(playUL != null){
+            playUL.onclick = function(){
+                if(selectedIndex !== null){
+                    cardgame.playCard(selectedIndex);
+
+                    selectedUL = null;
+                    selectedImg = null;
+                    selectedIndex = null;
+                }
+            };
+        }
     }
     else{
         player = cardgame.player1;

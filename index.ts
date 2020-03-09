@@ -300,5 +300,9 @@ io.on('connection', (socket: any) =>{
         io.emit('card_switch', cardgame);
     })
 
+    socket.on('card_play_card', function(index: number){
+        cardgame.playCard(index);
+    })
+
 })
 
